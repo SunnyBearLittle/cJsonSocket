@@ -7,16 +7,20 @@
 #define maxnum  1000
 #define BUF_SIZE 500
 #define INFO_SIZE 15
+#define DRAW_SIZE 15
 
 char returnData[100];
 
 int split_str(char* mySendStr);
 // 存储字段不同数据
 char* dataArrOne[INFO_SIZE];
+char* dataDrawOne[DRAW_SIZE];
+
 void sortOutPath(char* routerPathStr);
 int dataArrTwo[100][100];
 char* getData(char* dataStr);
 char* getPrev(char* dataStr);
+void save(char* drawStr, int drawCount);
 
 int main(int argc, char* argv[])
 {
@@ -25,9 +29,11 @@ int main(int argc, char* argv[])
 	SOCKADDR_IN sockAddr;
 	SOCKADDR clntAddr;
 	int nSize, arrSize, allSize, matrixSize,x,y;//matrixSize矩阵大小
-
+    char *startStr, *endStr;
     
 	char buffer[BUF_SIZE];
+	// 存储画图完整数据段
+	
 
 	WSAStartup(MAKEWORD(2, 2), &wsaData);
 	//创建套接字
@@ -44,6 +50,10 @@ int main(int argc, char* argv[])
 	
 	nSize = sizeof(SOCKADDR);
     arrSize = 0;
+
+    // 初始化startStr和endStr
+    startStr = "";
+    endStr = "";
 	while (1)
 	{
 		char* ptr;
@@ -53,6 +63,9 @@ int main(int argc, char* argv[])
 		float result;
 		int dist[maxnum];//保存路径
 		int pre[maxnum];     // 记录当前点的前一个结点
+        int drawCount;
+        char *routerStr;
+        int drawInfoSize;
 
         char* equipmentName, *lanAffliation, *routerIp, *operatingSystem, *taskSystem, *area, *prev, *next;
         char* deviceBrand, *transformRate,*routerProtocol, *jumpNumber,*linkDelay,*networkLevel;
@@ -62,9 +75,10 @@ int main(int argc, char* argv[])
 		//send(clntSock, buffer, strLen, 0);
 		char arrData[BUF_SIZE];
 		memcpy(&arrData, buffer, BUF_SIZE);
+		// printf("%s\n", arrData);
         // 判断数据发送是否结束,统计元素个数
         if(strcmp("q", arrData) == 0){
-            printf("数据发送完成\n");
+            printf("接收矩阵数据完成\n");
             // 将元素数量重置为0
             allSize = arrSize;
 
@@ -81,47 +95,83 @@ int main(int argc, char* argv[])
                 printf("\n");
             }
             arrSize = 0;
-        }else{
-            // printf("%s\n",arrData);
-            infoSize = split_str(arrData);
-            // printf("info_size:%d\n", infoSize);
-            // printf("routerPath:%s\n", dataArrOne[8]);
+        }else if(strcmp("s", arrData) == 0){
+            // 开始接收下一个数据
+            drawCount = 0;
+            startStr = "s";
+            continue;
+        }else if(strcmp("e", arrData) == 0){
+            // 结束画图数据接收
+            startStr = "";
+			printf("画图数据发送完成！\n");
 
-            // 整理字符串为二维数组数据
-            sortOutPath(dataArrOne[8]);
+			//处理画图数据
+            // router = drawDataStrArr[0], fireWall = drawDataStrArr[1], interChanger = drawDataStrArr[2], computer1 = drawDataStrArr[4]
+            printf("routerStr:%s\n", dataDrawOne[0]);
+            // printf("firewall:%s\n", dataDrawOne[1]);
+            // printf("interChanger:%s\n", dataDrawOne[2]);
+            // printf("computer:%s\n", dataDrawOne[3]);
 
-            // 获取设备数据
+
+            // drawInfoSize = split_str(routerStr);
+            // 获取equipmentName
             // equipmentName = getData(dataArrOne[0]);
             // printf("equipment:%s", equipmentName);
+        }else{
+            if(strcmp("s", startStr) == 0){
+                // char* temp;
+                // 存储路由器，防火墙等数据
+                // printf("数组下标：%d\n", drawCount);
+                // printf("防火墙等数据：%s\n", arrData);
+                // temp = arrData;
+                save(arrData, drawCount);
+                // dataDrawOne[drawCount] = temp;
+				// printf("存储数据：%s\n", dataDrawOne[drawCount]);
+                drawCount++;
+            }else {
+                 // 接收矩阵相关数据
 
-            // lanAffliation  = getData(dataArrOne[1]);
-            // printf("lanAffliation:%s\n", lanAffliation);
-            // routerIp  = getData(dataArrOne[2]);
-            // printf("routerIp:%s\n", routerIp);
-            // operatingSystem  = getData(dataArrOne[3]);
-            // printf("operatingSystem:%s\n", operatingSystem);
-            // deviceBrand  = getData(dataArrOne[4]);
-            // printf("deviceBrand:%s\n", deviceBrand);
-            // transformRate  = getData(dataArrOne[5]);
-            // printf("transformRate:%s\n", transformRate);
-            // routerProtocol  = getData(dataArrOne[6]);
-            // printf("routerProtocol:%s\n", routerProtocol);
-            // jumpNumber  = getData(dataArrOne[7]);
-            // printf("jumpNumber:%s\n", jumpNumber);
-            // linkDelay  = getData(dataArrOne[9]);
-            // printf("linkDelay:%s\n", linkDelay);
-            // networkLevel  = getData(dataArrOne[10]);
-            // printf("networkLevel:%s\n", networkLevel);
-            // taskSystem  = getData(dataArrOne[11]);
-            // printf("taskSystem:%s\n", taskSystem);
-            // area  = getData(dataArrOne[12]);
-            // printf("area:%s\n", area);
-            // prev  = getPrev(dataArrOne[13]);
-            // next  = getPrev(dataArrOne[14]);
-            // printf("prev:%s\tnext:%s\n", prev, next);
+                // printf("%s\n",arrData);
+                infoSize = split_str(arrData);
+                // printf("info_size:%d\n", infoSize);
+                // printf("routerPath:%s\n", dataArrOne[8]);
+
+                // 整理字符串为二维数组数据
+                sortOutPath(dataArrOne[8]);
+
+                // 获取设备数据
+                // equipmentName = getData(dataArrOne[0]);
+                // printf("equipment:%s", equipmentName);
+
+                // lanAffliation  = getData(dataArrOne[1]);
+                // printf("lanAffliation:%s\n", lanAffliation);
+                // routerIp  = getData(dataArrOne[2]);
+                // printf("routerIp:%s\n", routerIp);
+                // operatingSystem  = getData(dataArrOne[3]);
+                // printf("operatingSystem:%s\n", operatingSystem);
+                // deviceBrand  = getData(dataArrOne[4]);
+                // printf("deviceBrand:%s\n", deviceBrand);
+                // transformRate  = getData(dataArrOne[5]);
+                // printf("transformRate:%s\n", transformRate);
+                // routerProtocol  = getData(dataArrOne[6]);
+                // printf("routerProtocol:%s\n", routerProtocol);
+                // jumpNumber  = getData(dataArrOne[7]);
+                // printf("jumpNumber:%s\n", jumpNumber);
+                // linkDelay  = getData(dataArrOne[9]);
+                // printf("linkDelay:%s\n", linkDelay);
+                // networkLevel  = getData(dataArrOne[10]);
+                // printf("networkLevel:%s\n", networkLevel);
+                // taskSystem  = getData(dataArrOne[11]);
+                // printf("taskSystem:%s\n", taskSystem);
+                // area  = getData(dataArrOne[12]);
+                // printf("area:%s\n", area);
+                // prev  = getPrev(dataArrOne[13]);
+                // next  = getPrev(dataArrOne[14]);
+                // printf("prev:%s\tnext:%s\n", prev, next);
 
 
-            arrSize++;
+                arrSize++;
+            }
         }
         
 	}
@@ -130,6 +180,18 @@ int main(int argc, char* argv[])
 	//终止 DLL 的使用
 	WSACleanup();
 	return 0;
+}
+
+//保存到一维数组中
+void save(char* drawStr, int drawCount){
+    char* p;
+    p = malloc(strlen(drawStr));
+    if (p == NULL) {
+		exit(1);
+	}
+    strcpy(p, drawStr);
+
+    dataDrawOne[drawCount] = p;
 }
 
 //获取prev或next

@@ -78,11 +78,12 @@ int main()
 		char* mySendStr;
 		int i,j,size;
 		int num;
+        char *router1, *fireWall1, *interChanger1, *computer1;
 
         if( arr_num == 2 ) arr_num = 0;
 
 		count = 0;
-
+        printf("数据发送中...\n");
         if(str[arr_num] == "top"){
 			//1. 统计元素个数
 			for ( i = 0; i < sizeof(top) / sizeof(top[0]); i++)
@@ -103,12 +104,13 @@ int main()
                     mySendStr = "";
                     mySendStr = generateSendStr(i,j, top[i][j]);
                     // printf("mySendStr:%s\n", mySendStr);
-                    printf("===================分割线=====================\n");
+                    //printf("===================分割线=====================\n");
                     
                     sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 			        connect(sock, (SOCKADDR*)&sockAddr, sizeof(SOCKADDR));
                     num = send(sock, mySendStr, BUF_SIZE, 0);
-                    split_str(mySendStr);
+                    // 矩阵数据不进行展示
+                    // split_str(mySendStr);
                     if (num < 0) {
                         perror("send error!");
                         exit(1);
@@ -138,12 +140,12 @@ int main()
                     mySendStr = "";
                     mySendStr = generateSendStr(i,j, tree[i][j]);
                     // printf("mySendStr:%s\n", mySendStr);
-                    printf("===================分割线=====================\n\n");
+                   // printf("===================分割线=====================\n\n");
                     sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 			        connect(sock, (SOCKADDR*)&sockAddr, sizeof(SOCKADDR));
                     
                     num = send(sock, mySendStr, BUF_SIZE, 0);
-                    split_str(mySendStr);
+                    // split_str(mySendStr);
                     if (num < 0) {
                         perror("send error!");
                         exit(1);
@@ -160,6 +162,84 @@ int main()
         
         // 数据发送结束之后，发送一个字符q表示数据传输完成
         num = send(sock, "q", BUF_SIZE, 0);
+        if (num < 0) {
+            perror("send error!");
+            exit(1);
+        }
+
+        memset(bufSend, 0, BUF_SIZE);  //重置缓冲区
+        memset(bufRecv, 0, BUF_SIZE);  //重置缓冲区
+
+        // 画图数据发送开始标记
+        sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+        connect(sock, (SOCKADDR*)&sockAddr, sizeof(SOCKADDR));
+        num = send(sock, "s", BUF_SIZE, 0);
+        if (num < 0) {
+            perror("send error!");
+            exit(1);
+        }
+
+        memset(bufSend, 0, BUF_SIZE);  //重置缓冲区
+        memset(bufRecv, 0, BUF_SIZE);  //重置缓冲区
+
+        // 发送画图数据
+        router1 = "'equipmentName': '路由器1', 'deviceType':'路由器','lanAffiliation': '局域网1','routerIp': '192.168.1.1','operatingSystem': 'Windows 7','deviceBrand': '思科','transformRate': '25Mbps','routerProtocol':'协议', 'jumpNumber':'8','routerPath':'路径','linkDelay':'20ms','networkLevel': '骨干网','taskSystem': '军事系统','area': '印度新德里','prev':[],'next':['防火墙1']"; 
+        sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+        connect(sock, (SOCKADDR*)&sockAddr, sizeof(SOCKADDR));
+        num = send(sock, router1, BUF_SIZE, 0);
+        if (num < 0) {
+            perror("send error!");
+            exit(1);
+        }
+        Sleep(500);
+
+        memset(bufSend, 0, BUF_SIZE);  //重置缓冲区
+        memset(bufRecv, 0, BUF_SIZE);  //重置缓冲区
+        
+        fireWall1 = "'equipmentName': '防火墙1', 'deviceType':'防火墙','lanAffiliation': '局域网1','safeStrategy': '安全策略','networkLevel':'核心网', 'taskSystem':'军事系统','area': '印度新德里','prev':['路由器1'],'next':['交换机1']";
+        sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+        connect(sock, (SOCKADDR*)&sockAddr, sizeof(SOCKADDR));
+        num = send(sock, fireWall1, BUF_SIZE, 0);
+        if (num < 0) {
+            perror("send error!");
+            exit(1);
+        }
+        Sleep(500);
+
+        memset(bufSend, 0, BUF_SIZE);  //重置缓冲区
+        memset(bufRecv, 0, BUF_SIZE);  //重置缓冲区
+        
+        interChanger1 = "'equipmentName': '交换机1','interchangerIp':'192.168.1.1','lanAffiliation': '局域网1','deviceType': '交换机','operatingSystem': 'IOS','deviceBrand': '思科', 'interchangerProtocol': 'STP','transformRate': '100Mbps', 'handlingCapacity': '50Mbps','linkDelay': '1ms','livePort': '8','gateway': '192.168.1.1','networkLevel': '核心网', 'area': '印度新德里','taskSystem': '军事系统','prev':['防火墙1'],'next':['主机1']";
+        sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+        connect(sock, (SOCKADDR*)&sockAddr, sizeof(SOCKADDR));
+        num = send(sock, interChanger1, BUF_SIZE, 0);
+        if (num < 0) {
+            perror("send error!");
+            exit(1);
+        }
+        Sleep(500);
+
+        memset(bufSend, 0, BUF_SIZE);  //重置缓冲区
+        memset(bufRecv, 0, BUF_SIZE);  //重置缓冲区
+
+        computer1 = "'equipmentName': '主机1', 'lanAffiliation': '局域网1','hostIp': '192.168.1.1','deviceType': '主机','operatingSystem': 'Windows 7','deviceBrand': '思科','hostProtocol': 'HTTP','handlingCapacity': '50Mbps','linkDelay': '1ms','livePort': '8','gateway': '192.168.1.200','area': '印度新德里','networkLevel': '核心网','taskSystem': '军事系统1数据','prev':['交换机1'],'next':[]";
+        sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+        connect(sock, (SOCKADDR*)&sockAddr, sizeof(SOCKADDR));
+        printf("发送的computer：%s\n", computer1);
+		num = send(sock, computer1, BUF_SIZE, 0);
+        if (num < 0) {
+            perror("send error!");
+            exit(1);
+        }
+        Sleep(500);
+
+        memset(bufSend, 0, BUF_SIZE);  //重置缓冲区
+        memset(bufRecv, 0, BUF_SIZE);  //重置缓冲区
+
+        // 画图数据结束标记
+        sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+        connect(sock, (SOCKADDR*)&sockAddr, sizeof(SOCKADDR));
+        num = send(sock, "e", BUF_SIZE, 0);
         if (num < 0) {
             perror("send error!");
             exit(1);
@@ -200,6 +280,35 @@ char* generateSendStr(int from, int to, int weight){
     return mySendStr;
 }
 
+// 生成lanAffliation
+char* generateLanAffliation(){
+    char* lanStr = "局域网";
+    int a;
+    char lanBuff[120];
+    // 随机数1-5
+    srand((unsigned)time(NULL));
+    a = rand() % 5 + 1;
+
+    sprintf(lanBuff, "%d", a);
+    lanStr = join(lanStr, lanBuff);
+    return lanStr;
+}
+
+// 生成设备名称
+char* generateEquipment(){
+    char* equipmentStr;
+    int a;
+    char* selectEquipment[] = {"路由器", "防火墙", "交换机1","交换机2","集线器"};
+
+    // 随机数1-5
+    srand((unsigned)time(NULL));
+    a = rand() % 5 + 1;
+	printf("%d\n", a);
+    equipmentStr = selectEquipment[a];
+    
+    return equipmentStr;
+}
+
 // 路径生成
 char* generatePath(int from, int to, int weight){
     char* routerPathStr;
@@ -232,7 +341,6 @@ char* generatePath(int from, int to, int weight){
 
 
 // 随机生成IP
-
 char* randIp(){
     int a;
     char ip4[120];
