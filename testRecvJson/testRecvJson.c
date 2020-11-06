@@ -14,6 +14,7 @@ char returnData[100];
 int split_str(char* mySendStr);
 // 存储字段不同数据
 char* dataArrOne[INFO_SIZE];
+char* routerArrOne[INFO_SIZE];
 char* dataDrawOne[DRAW_SIZE];
 
 void sortOutPath(char* routerPathStr);
@@ -21,6 +22,7 @@ int dataArrTwo[100][100];
 char* getData(char* dataStr);
 char* getPrev(char* dataStr);
 void save(char* drawStr, int drawCount);
+void routerStrSplit(char* routerStr);
 
 int main(int argc, char* argv[])
 {
@@ -107,16 +109,12 @@ int main(int argc, char* argv[])
 
 			//处理画图数据
             // router = drawDataStrArr[0], fireWall = drawDataStrArr[1], interChanger = drawDataStrArr[2], computer1 = drawDataStrArr[4]
-            printf("routerStr:%s\n", dataDrawOne[0]);
-            // printf("firewall:%s\n", dataDrawOne[1]);
-            // printf("interChanger:%s\n", dataDrawOne[2]);
-            // printf("computer:%s\n", dataDrawOne[3]);
-
-
-            // drawInfoSize = split_str(routerStr);
-            // 获取equipmentName
-            // equipmentName = getData(dataArrOne[0]);
-            // printf("equipment:%s", equipmentName);
+            // printf("routerStr:%s\n", dataDrawOne[0]);
+            routerStrSplit(dataDrawOne[0]);
+            printf("%s\n",routerArrOne[0]);
+            equipmentName = getData(routerArrOne[0]);
+            printf("equipment:%s", equipmentName);
+            
         }else{
             if(strcmp("s", startStr) == 0){
                 // char* temp;
@@ -263,6 +261,23 @@ void sortOutPath(char* routerPathStr){
     dataArrTwo[x][y] = weight;
 
 }
+
+
+// 切割路由信息
+void routerStrSplit(char* mySendStr){
+    char* p;
+    int a;
+
+    a=0;
+    p=strtok(mySendStr,",");
+    while(p != NULL){
+        // printf("%s\n", p);
+        routerArrOne[a] = p;
+        p = strtok(NULL,",");
+        a++;
+    }
+}
+
 
 
 // 切割字符串
